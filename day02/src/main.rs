@@ -1,102 +1,108 @@
 use std::fs;
-use std::ops::Index;
-use std::collections::HashMap;
 
-struct Sbeve {
-    wins: String,
-    ties: String,
-    value: usize,
+#[derive(PartialEq, Clone)]
+enum Move {
+    Rock = 1,
+    Paper = 2,
+    Scissors = 3,
 }
 
-fn build_sbeve(key: &str, wins: &str, ties: &str, value: usize) -> (String, Sbeve) {
-    (String::from(key),
-    Sbeve {
-        wins: String::from(wins),
-        ties: String::from(ties),
-        value
-    })
+fn move_from_str(s: &str) -> Move {
+    match s {
+        "A" | "X" => Move::Rock,
+        "B" | "Y" => Move::Paper,
+        "C" | "Z" => Move::Scissors,
+        _ => panic!("Oops"),
+    }
+}
+
+fn winning_move(m: &Move) -> Move {
+    match m {
+        Move::Rock => Move::Paper,
+        Move::Paper => Move::Scissors,
+        Move::Scissors => Move::Rock,
+    }
+}
+
+fn losing_move(m: &Move) -> Move {
+    match m {
+        Move::Rock => Move::Scissors,
+        Move::Paper => Move::Rock,
+        Move::Scissors => Move::Paper,
+    }
+}
+
+fn move_from_round_end(enemy: &str, hero: &str) -> Move {
+    let enemy_move = move_from_str(enemy);
+    match hero {
+        "X" => losing_move(&enemy_move),
+        "Z" => winning_move(&enemy_move),
+        "Y" => enemy_move,
+        _ => panic!("Oops"),
+    }
 }
 
 fn main() {
-    part1();
-    part2();
-}
-
-fn part1() {
-    let mapping = HashMap::from([
-        build_sbeve("X", "C", "A", 1),
-        build_sbeve("Y", "A", "B", 2),
-        build_sbeve("Z", "B", "C", 3),
-    ]);
-
     let file_path = "./src/input.txt";
     //let file_path = "./src/example.txt";
 
-    let strategy = fs::read_to_string(file_path).unwrap();
-    let strategy = strategy.lines()
-        .map(|line| { line.split(" ").collect::<Vec<&str>>() })
-        .collect::<Vec<Vec<&str>>>();
+    let guide = fs::read_to_string(file_path).unwrap();
+
+    part_1(&guide);
+    part_2(&guide);
+}
+
+fn part_1(guide: &str) {
+    let guide = guide.trim().lines()
+        .map(|line| {
+            line.split(" ")
+                .map(|s| { move_from_str(s) })
+                .collect()
+        })
+        .collect::<Vec<Vec<Move>>>();
 
     let mut score = 0;
 
-    strategy.iter().for_each(|step| {
-        let item_map = &mapping[step[1]];
-        score += item_map.value;
+    for game in guide {
+        score += match game[1] {
+            Move::Rock => 1,
+            Move::Paper => 2,
+            Move::Scissors => 3,
+        };
 
-        if item_map.wins == step[0] {
-            score += 6;
-        } else if item_map.ties == step[0] {
+        if game[0] == game[1] {
             score += 3;
+        } else if game[1] == winning_move(&game[0]) {
+            score += 6;
         }
-    });
+    }
 
     println!("{score}");
 }
 
-struct Sbove {
-    Z: usize,
-    Y: usize,
-    X: usize,
-}
-
-impl Index<&'_ str> for Sbove {
-    type Output = usize;
-    fn index(&self, s: &str) -> &usize {
-        match s {
-            "X" => &self.X,
-            "Y" => &self.Y,
-            "Z" => &self.Z,
-            _ => panic!("unknown field: {}", s),
-        }
-    }
-}
-
-fn build_sbove(key: &str, Z: usize, Y: usize, X: usize) -> (String, Sbove) {
-    (String::from(key),
-    Sbove { Z, Y, X })
-}
-
-fn part2() {
-    let mapping = HashMap::from([
-        build_sbove("A", 8, 4, 3),
-        build_sbove("B", 9, 5, 1),
-        build_sbove("C", 7, 6, 2),
-    ]);
-
-    let file_path = "./src/input.txt";
-    //let file_path = "./src/example.txt";
-
-    let strategy = fs::read_to_string(file_path).unwrap();
-    let strategy = strategy.trim().split("\n")
-        .map(|line| { line.split(" ").collect::<Vec<&str>>() })
+fn part_2(guide: &str) {
+    let guide = guide.trim().lines()
+        .map(|line| {
+            line.split(" ").collect()
+        })
         .collect::<Vec<Vec<&str>>>();
 
     let mut score = 0;
 
-    strategy.iter().for_each(|step| {
-        let item_map = &mapping[step[0]];
-        score += item_map[step[1]];
-    });
+    for game in guide {
+        score += match move_from_round_end(game[0], game[1]) {
+            Move::Rock => 1,
+            Move::Paper => 2,
+            Move::Scissors => 3,
+        };
+
+        score += match game[1] {
+            "X" => 0,
+            "Y" => 3,
+            "Z" => 6,
+            _ => panic!("Oops"),
+        };
+    }
 
     println!("{score}");
 }
