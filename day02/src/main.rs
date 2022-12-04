@@ -1,6 +1,6 @@
 use std::fs;
 
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq)]
 enum Move {
     Rock = 1,
     Paper = 2,
@@ -11,11 +11,9 @@ fn move_from_str(s: &str) -> Move {
     match s {
         "A" | "X" => Move::Rock,
         "B" | "Y" => Move::Paper,
-        "C" | "Z" => Move::Scissors,
-        _ => panic!("Oops"),
+        _ => Move::Scissors,
     }
 }
-
 fn winning_move(m: &Move) -> Move {
     match m {
         Move::Rock => Move::Paper,
@@ -37,8 +35,7 @@ fn move_from_round_end(enemy: &str, hero: &str) -> Move {
     match hero {
         "X" => losing_move(&enemy_move),
         "Z" => winning_move(&enemy_move),
-        "Y" => enemy_move,
-        _ => panic!("Oops"),
+        _ => enemy_move,
     }
 }
 
@@ -58,8 +55,7 @@ fn part_1(guide: &str) {
             line.split(" ")
                 .map(|s| { move_from_str(s) })
                 .collect()
-        })
-        .collect::<Vec<Vec<Move>>>();
+        }).collect::<Vec<Vec<Move>>>();
 
     let mut score = 0;
 
@@ -70,11 +66,9 @@ fn part_1(guide: &str) {
             Move::Scissors => 3,
         };
 
-        if game[0] == game[1] {
-            score += 3;
-        } else if game[1] == winning_move(&game[0]) {
+        if game[1] == winning_move(&game[0]) {
             score += 6;
-        }
+        } else if game[0] == game[1] { score += 3; }
     }
 
     println!("{score}");
@@ -84,8 +78,7 @@ fn part_2(guide: &str) {
     let guide = guide.trim().lines()
         .map(|line| {
             line.split(" ").collect()
-        })
-        .collect::<Vec<Vec<&str>>>();
+        }).collect::<Vec<Vec<&str>>>();
 
     let mut score = 0;
 
@@ -97,10 +90,9 @@ fn part_2(guide: &str) {
         };
 
         score += match game[1] {
-            "X" => 0,
-            "Y" => 3,
             "Z" => 6,
-            _ => panic!("Oops"),
+            "Y" => 3,
+            _ => 0,
         };
     }
 
