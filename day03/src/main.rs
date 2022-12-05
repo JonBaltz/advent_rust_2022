@@ -1,11 +1,7 @@
 use std::fs;
 
-fn get_priority(code: u8) -> u8 {
-    if code > 96 {
-        code - 96
-    } else {
-        code - 38
-    }
+fn get_priority(item: char) -> usize {
+    1 + ('a'..='z').chain('A'..='Z').collect::<String>().find(item).unwrap()
 }
 
 fn main() {
@@ -27,7 +23,7 @@ fn part_1(bags: &Vec<&str>) {
         let pocket_1 = &stuff[0..half_length];
         for item in stuff[half_length..].chars() {
             if pocket_1.contains(item) { 
-                sum += get_priority(item as u8) as u32;
+                sum += get_priority(item);
                 break;
             }
         }
@@ -54,7 +50,7 @@ fn part_2(bags: &Vec<&str>) {
 
         for item in three.chars() {
             if one_plus_two.contains(item) { 
-                sum += get_priority(item as u8) as u32;
+                sum += get_priority(item);
                 break;
             }
         }
