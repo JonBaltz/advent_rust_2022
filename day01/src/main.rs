@@ -4,32 +4,32 @@ fn main() {
     let file_path = "./src/input.txt";
     //let file_path = "./src/example.txt";
 
-    let elves = fs::read_to_string(file_path).unwrap()
+    let elves: Vec<Vec<usize>> = fs::read_to_string(file_path).unwrap()
         .trim().split("\n\n")
         .map(|elf| {
-            elf.split("\n")
+            elf.lines()
                 .map(|item| {
-                    item.parse::<usize>().unwrap()
-                }).collect::<Vec<usize>>()
-        }).collect::<Vec<Vec<usize>>>();
+                    item.parse().unwrap()
+                }).collect()
+        }).collect();
 
     part_1(&elves);
     part_2(&elves);
 }
 
 fn part_1(elves: &Vec<Vec<usize>>) {
-    let mut max = 0;
-    for elf in elves {
+    let max = elves.iter().fold(0, |max, elf| {
         let sum = elf.iter().sum();
-        if sum > max { max = sum };
-    }
+        if sum > max { sum } else { max }
+    });
+
     println!("{max}");
 }
 
 fn part_2(elves: &Vec<Vec<usize>>) {
-    let mut elf_sums = elves.iter().map(|elf| {
+    let mut elf_sums: Vec<usize> = elves.iter().map(|elf| {
         elf.iter().sum()
-    }).collect::<Vec<usize>>();
+    }).collect();
 
     elf_sums.sort_by(|a, b| b.cmp(a));
 
